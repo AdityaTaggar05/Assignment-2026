@@ -203,3 +203,68 @@ nc localhost 30000
 ---
 
 ### Level 16
+
+The command `openssl` and `s_client` allow us to access the openssl application commands to connect and send data over SSL/TLS protocol. The flag `ign_eof` waits for the server to respond after sending the input data.
+
+```bash
+echo "8xCjnmgoKbGLhHFAZlGE5Tmu4M2tKJQo" | openssl s_client -connect localhost:30001 -ign_eof # which gives us the password to the next level
+exit
+ssh bandit16@bandit.labs.overthewire.org -p 2220
+```
+
+---
+
+### Level 17
+
+We need to first scan which ports are active. Then which have SSL/TLS enabled on them. This can be done by
+
+```bash
+nmap -p 31000-32000 localhost # returns 5 ports that are active
+
+# now use the following command on all 5 of those ports to check for the password
+echo "kSkvUpMQ7lBYyCM4GBPvCvT1BfWRy0Dx" | openssl s_client -ign_eof -connect localhost:<port>
+
+# the port 31790 reports back with the private ssh key to login to level 17. copy the key contents
+exit
+nvim sshkey.private # paste the contents here
+ssh -i sshkey.private bandit17@bandit.labs.overthewire.org -p 2220
+
+# once logged in, you can just output the file to get the password for level 17
+cat /etc/bandit_pass/bandit17
+```
+
+---
+
+### Level 18
+
+We need to `diff` both the files to get the line that was changed.
+
+```bash
+diff passwords.old passwords.new # copy the contents of the changed line
+exit
+ssh bandit18@bandit.labs.overthewire.org -p 2220
+```
+
+---
+
+### Level 19
+
+The `ssh` command lets us run other linux commands on connection, so we can output the file contents even before the connection is broken by the `.bashrc` commands
+
+```bash
+ssh bandit18@bandit.labs.overthewire.org -p 2220 cat readme # outputs the file contents on logging in with the level 18 password
+exit
+ssh bandit19@bandit.labs.overthewire.org -p 2220
+```
+
+---
+
+### Level 20
+
+On simply running the binary, it says `Run a command as another user`. Also, notice that running `whoami` returns `bandit19` while running `./bandit20-do whoami` returns `bandit20`. Another layer of verification can be done by using the command `id`. Normally, `id` returns creds for `bandit19` but running with the binary, it adds another id corresponding to `bandit20`. To clear the level, run
+
+```bash
+./bandit20-do cat /etc/bandit_pass/bandit20 # this runs the cat command with the rights of bandit20 and outputs the password
+exit
+ssh bandit20@bandit.labs.overthewire.org -p 2220
+```
