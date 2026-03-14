@@ -1,12 +1,28 @@
 #!/bin/bash
 
 # Define an array of sentences/paragraphs for the test
-TEXTS=(
-    "The quick brown fox jumps over the lazy dog."
-    "Bash is a Unix shell and command language written by Brian Fox for the GNU Project."
-    "Programming is the process of creating a set of instructions that tell a computer how to perform a task."
-    "Consistency is key when learning how to type fast. Keep your fingers on the home row."
-    "Open-source software is software with source code that anyone can inspect, modify, and enhance."
+EASY_TEXTS=(
+  "The sun is bright today."
+  "I like to read books."
+  "Cats sleep on the sofa."
+  "She went to the park."
+  "We had fun at school."
+)
+
+MEDIUM_TEXTS=(
+  "The quick brown fox jumps over the lazy dog."
+  "She packed her bag and left for the early train."
+  "A gentle breeze moved the leaves in the quiet garden."
+  "The teacher asked everyone to finish the task before lunch."
+  "I forgot my umbrella and got soaked in the rain."
+)
+
+HARD_TEXTS=(
+  "Despite the heavy rain, the players continued the match until the final whistle blew."
+  "She whispered, “Please remember to lock the door before you leave tonight.”"
+  "In 2024, scientists announced a breakthrough that could change renewable energy forever."
+  "The engineer carefully reviewed the 42-page report before submitting it."
+  "While walking through the crowded market, I heard music, laughter, and distant conversations."
 )
 
 # Function to calculate accuracy by comparing character by character
@@ -36,18 +52,38 @@ calculate_accuracy() {
     fi
 }
 
+choose_difficulty() {
+  read -p "Choose the difficulty level for you: Easy (e), Medium (m), Hard (h) : " difficulty
+  sentence=""
+  random_idx=$(( RANDOM % 5 ))
+
+  case "$difficulty" in
+    e)
+      sentence="${EASY_TEXTS[$random_idx]}"
+      ;;
+    n)
+      sentence="${MEDIUM_TEXTS[$random_idx]}"
+      ;;
+    h)
+      sentence="${HARD_TEXTS[$random_idx]}"
+      ;;
+  esac
+
+  echo "$sentence"
+}
+
 # Main test function
 run_test() {
+    # Pick a random text from the array
+    target_text=$(choose_difficulty)
+    echo ""
+
     clear
     echo "=========================================="
     echo "          BASH TYPING TEST                "
     echo "=========================================="
     echo "Press [ENTER] when you are ready to start."
     read -r
-
-    # Pick a random text from the array
-    random_idx=$(( RANDOM % ${#TEXTS[@]} ))
-    target_text="${TEXTS[$random_idx]}"
 
     clear
     echo "Type the text below and press [ENTER] when done:"
