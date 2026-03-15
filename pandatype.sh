@@ -35,43 +35,6 @@ error() {
   exit 1
 }
 
-while [[ -n "$1" ]]; do
-  case "$1" in
-    -w | --words)
-      [[ -z "$2" || "$2" =~ ^- ]] && error "missing word count"
-      [[ "$2" =~ ^[0-9]+$ ]] || error "word count must be a number"
-
-      word_count=$2 
-      shift 2
-      ;;
-    -l | --language)
-      [[ -z "$2" || "$2" =~ ^- ]] && error "missing language"
-      language=$2 
-      shift 2
-      ;;
-    -d | --difficulty)
-      [[ -z "$2" || "$2" =~ ^- ]] && error "missing difficulty"
-      case "$2" in
-        e|m|h|easy|medium|hard)
-          difficulty="$2"
-          ;;
-        *)
-          error "invalid difficulty: $2 (use easy, medium, hard)"
-          ;;
-      esac
-      shift 2
-      ;;
-    -h | --help)
-      usage
-      exit
-      ;;
-    *)
-      usage >&2
-      exit 1 
-      ;;
-  esac
-done
-
 # TUI helpers
 center() {
   term_width=$(tput cols)
