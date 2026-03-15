@@ -1,8 +1,29 @@
 #!/bin/bash
 
+# Variables for the application
+word_count=8
+language="english"
+difficulty="m"
+
 WORDSET="wordset.txt"
 mapfile -t words < "$WORDSET"
 symbols=("!" "?" "." "," ";" ":" "@", "#", "&", "*")
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+  -w, --words <number>        Number of words (default: $word_count)
+  -l, --language <language>   Language (default: $language)
+  -d, --difficulty <level>    Difficulty: easy/e | medium/m | hard/h (default: $difficulty)
+  -h, --help                  Show this help message and exit
+
+Examples:
+  $(basename "$0") -w 20 -l english -d easy
+  $(basename "$0") --words 50 --language spanish --difficulty hard
+EOF
+}
 
 # Function to calculate accuracy by comparing character by character
 calculate_accuracy() {
@@ -53,10 +74,8 @@ generate_sentence() {
   done
 }
 
-choose_difficulty() {
-  read -p "Choose the difficulty level for you: Easy (e), Medium (m), Hard (h) : " difficulty
-  sentence=""
-  random_idx=$(( RANDOM % 5 ))
+generate_target_text() {
+  sentence=
 
   case "$difficulty" in
     e)
@@ -68,6 +87,10 @@ choose_difficulty() {
     h)
       sentence=$(generate_sentence 16 3)
       ;;
+    *)
+      echo "Invalid difficult: $difficulty" >&2
+      exit 1
+      ;;
   esac
 
   echo "$sentence"
@@ -76,7 +99,7 @@ choose_difficulty() {
 # Main test function
 run_test() {
     # Pick a random text from the array
-    target_text=$(choose_difficulty)
+    target_text=$(generate_target_text)
     echo ""
 
     clear
@@ -126,8 +149,37 @@ run_test() {
     echo "=========================================="
 }
 
+while [[ -n "$1" ]]; do
+  case "$1" in
+    -w | --words)
+      word_count=$2 
+      shift 2
+      ;;
+    -l | --language)
+      language=$2 
+      shift 2
+      ;;
+    -d | --difficulty)
+      difficulty=$2 
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit
+      ;;
+    *)
+      usage >&2
+      exit 1 
+      ;;
+  esac
+done
+
 # Infinite loop to allow restarting the test
 while true; do
+    if [[ -z "$difficulty" ]]; then 
+      read -p "Choose the difficulty level for you: Easy (e), Medium (m), Hard (h) : " difficulty
+    fi
+
     run_test
 
     echo ""
