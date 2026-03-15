@@ -111,7 +111,7 @@ draw_menu() {
   done
 
   echo ""
-  echo "Use the arrow keys to navigate, ENTER to select"
+  echo "Use the arrow keys or j/k to navigate, ENTER to select"
 }
 
 # Input handling
@@ -240,12 +240,12 @@ menu_loop() {
     key=$(read_key)
 
     case "$key" in
-      "[A")
+      "[A" | "k")
         ((selected--))
         ((selected<0)) && selected=$((${#menu_items[@]}-1))
         draw_menu
         ;;
-      "[B")
+      "[B" | "j")
         ((selected++))
         ((selected>=${#menu_items[@]})) && selected=0
         draw_menu
