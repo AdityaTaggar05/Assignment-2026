@@ -9,7 +9,7 @@ symbols=("!" "?" "." "," ";" ":" "@" "#" "&" "*")
 words=()
 
 selected=0
-menu_items=("Start Test" "Word Count" "Difficulty" "Language" "Quit")
+menu_items=("Start Test" "Word Count" "Difficulty" "Language" "History" "Quit")
 
 # Usage function
 usage() {
@@ -212,8 +212,11 @@ run_test() {
 
   accuracy=$(calculate_accuracy "$target" "$input")
 
+  clear
+  draw_header
+
   save_results "$time" "$wpm" "$accuracy"
-  show_results "$time" "$wpm" "$accuracy"
+  show_results "$time" "$wpm" "$accuracy" "$(date)"
 
   echo "Press any key to return to menu..."
   read -rsn1
@@ -227,7 +230,7 @@ save_results() {
     touch $filename
   fi
 
-  echo "$1,$2,$3" > $filename
+  echo "$1,$2,$3,$(date)" >> $filename
 }
 
 # Results screen
@@ -237,11 +240,32 @@ show_results() {
   echo "             RESULTS                "
   echo "===================================="
   echo ""
-  echo "Time      : $1 sec"
-  echo "WPM       : $2"
-  echo "Accuracy  : $3 %"
+  echo "Time          : $1 sec"
+  echo "WPM           : $2"
+  echo "Accuracy      : $3 %"
+  echo "Test Done on  : $4"
   echo ""
   echo "===================================="
+}
+
+# History screen
+show_history() {
+  clear
+
+  file="$HOME/.local/share/pandatype-results.csv"
+
+  [[ -f "$file" ]] || {
+    echo "No history available."
+    read -rsn1
+    return
+  }
+
+  draw_header
+  while IFS=',' read -r time wpm accuracy timestamp; do
+    show_results "$time" "$wpm" "$accuracy" "$timestamp"
+  done < "$file"
+
+  echo ""
   echo "Press any key to return to menu..."
   read -rsn1
 }
@@ -282,6 +306,10 @@ menu_loop() {
             draw_menu
             ;;
           4)
+            show_history
+            draw_menu
+            ;;
+          5)
             clear
             exit
             ;;
