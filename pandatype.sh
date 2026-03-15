@@ -129,7 +129,13 @@ load_wordset() {
 
   if ! [[ -f "$filename" ]]; then
     mkdir -p "$HOME/.local/share"
-    curl -L "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/$language.json" -o "$filename"
+    if ! curl --silent --fail -L "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/$language.json" -o "$filename"; then
+      echo "no wordset found corresponding to language $language. Reverting to default (english) in 2 seconds..."
+      sleep 2
+      language="english"
+      load_wordset
+      return
+    fi
   fi
 
   mapfile -t words < <(jq -r '.words[]' "$filename" | tr -d '\r')
@@ -293,11 +299,32 @@ menu_loop() {
             draw_menu
             ;;
           1)
-            read -p "Enter word count: " word_count
+            while true; do
+              read -p "Enter word count: " temp
+              if [[ "$temp" =~ ^[0-9]+$ ]]; then
+                word_count="$temp"
+                break
+              else
+                echo "word count must be a number"
+                echo ""
+              fi
+            done
             draw_menu
             ;;
           2)
-            read -p "Difficulty (e/m/h): " difficulty
+            while true; do
+              read -p "Difficulty (e/m/h): " temp
+              case "$temp" in
+                e|m|h|easy|medium|hard)
+                  difficulty="$temp"
+                  break
+                  ;;
+                *)
+                  echo "difficulty must either be easy/e, medium/m, hard/h"
+                  echo ""
+                  ;;
+              esac
+            done
             draw_menu
             ;;
           3)
@@ -318,9 +345,6 @@ menu_loop() {
     esac
   done
 }
-
-tput civis
-trap "tput cnorm; clear; exit" EXIT
 
 # Load provided settings through cli options
 while [[ -n "$1" ]]; do
@@ -360,5 +384,10 @@ while [[ -n "$1" ]]; do
   esac
 done
 
-load_wordset
+if ! load_wordset; then
+  exit 1 
+fi
+
+tput civis
+trap "tput cnorm; clear; exit" EXIT
 menu_loop
