@@ -212,14 +212,26 @@ run_test() {
 
   accuracy=$(calculate_accuracy "$target" "$input")
 
+  save_results "$time" "$wpm" "$accuracy"
   show_results "$time" "$wpm" "$accuracy"
+
+  echo "Press any key to return to menu..."
+  read -rsn1
+}
+
+# Saving Results
+save_results() {
+  filename="$HOME/.local/share/pandatype-results.csv"
+  if ! [[ -f "$filename" ]]; then
+    mkdir -p "$HOME/.local/share/"
+    touch $filename
+  fi
+
+  echo "$1,$2,$3" > $filename
 }
 
 # Results screen
 show_results() {
-  clear
-  draw_header
-
   echo ""
   echo "===================================="
   echo "             RESULTS                "
