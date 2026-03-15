@@ -5,9 +5,8 @@ word_count=8
 language="english"
 difficulty="m"
 
-WORDSET="wordset.txt"
-mapfile -t words < "$WORDSET"
-symbols=("!" "?" "." "," ";" ":" "@", "#", "&", "*")
+words=()
+symbols=("!" "?" "." "," ";" ":" "@" "#" "&" "*")
 
 usage() {
   cat <<EOF
@@ -23,6 +22,21 @@ Examples:
   $(basename "$0") -w 20 -l english -d easy
   $(basename "$0") --words 50 --language spanish --difficulty hard
 EOF
+}
+
+# Load the requested language's wordset 
+load_wordset() {
+  filename="$HOME/.local/share/$language.json"
+  if ! [[ -f "$filename" ]]; then 
+    echo "Downloading wordset for the language $language..."
+    echo ""
+    mkdir -p "$HOME/.local/share"
+    curl -L "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/$language.json" -o "$filename"
+    echo "download complete..."
+    echo ""
+  fi
+
+  mapfile -t words < <(jq -r '.words[]' "$filename" | tr -d '\r')
 }
 
 # Function to calculate accuracy by comparing character by character
@@ -67,7 +81,7 @@ generate_sentence() {
     fi
 
     # To ensure no extra whitespace is added at the end of sentence
-    if (( i != num_words )); then 
+    if (( i != word_count )); then 
       echo -n " "
     fi
   done
@@ -159,9 +173,7 @@ while [[ -n "$1" ]]; do
   case "$1" in
     -w | --words)
       [[ -z "$2" || "$2" =~ ^- ]] && error "missing word count"
-      if ! [[ "$2" =~ ^[0-9]+$ ]]; then
-        error "word count must be a number"
-      fi
+      [[ "$2" =~ ^[0-9]+$ ]] || error "word count must be a number"
 
       word_count=$2 
       shift 2
@@ -174,7 +186,7 @@ while [[ -n "$1" ]]; do
     -d | --difficulty)
       [[ -z "$2" || "$2" =~ ^- ]] && error "missing difficulty"
       case "$2" in
-        easy|medium|hard)
+        e|m|h|easy|medium|hard)
           difficulty="$2"
           ;;
         *)
@@ -194,12 +206,9 @@ while [[ -n "$1" ]]; do
   esac
 done
 
+load_wordset
 # Infinite loop to allow restarting the test
 while true; do
-    if [[ -z "$difficulty" ]]; then 
-      read -p "Choose the difficulty level for you: Easy (e), Medium (m), Hard (h) : " difficulty
-    fi
-
     run_test
 
     echo ""
