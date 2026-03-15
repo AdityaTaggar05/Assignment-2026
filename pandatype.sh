@@ -78,14 +78,14 @@ generate_target_text() {
   sentence=
 
   case "$difficulty" in
-    e)
-      sentence=$(generate_sentence 8 1)
+    e | easy)
+      sentence=$(generate_sentence 1)
       ;;
-    m)
-      sentence=$(generate_sentence 12 5)
+    m | medium)
+      sentence=$(generate_sentence 5)
       ;;
-    h)
-      sentence=$(generate_sentence 16 3)
+    h | hard)
+      sentence=$(generate_sentence 3)
       ;;
     *)
       echo "Invalid difficult: $difficulty" >&2
