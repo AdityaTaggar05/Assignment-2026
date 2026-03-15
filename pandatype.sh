@@ -54,10 +54,9 @@ calculate_accuracy() {
 
 # Generate sentence based on the passed parameters
 generate_sentence() {
-  num_words=$1 
-  freq_symbols=$2 
+  freq_symbols=$1 
 
-  for ((i=1;i<=num_words;i++)); do
+  for ((i=1;i<=word_count;i++)); do
     rand=$(( RANDOM % freq_symbols ))
     random_idx=$(( RANDOM % ${#words[@]} ))
     echo -n "${words[$random_idx]}"
@@ -149,18 +148,39 @@ run_test() {
     echo "=========================================="
 }
 
+error() {
+  echo "error: $1" >&2
+  echo >&2
+  usage >&2
+  exit 1
+}
+
 while [[ -n "$1" ]]; do
   case "$1" in
     -w | --words)
+      [[ -z "$2" || "$2" =~ ^- ]] && error "missing word count"
+      if ! [[ "$2" =~ ^[0-9]+$ ]]; then
+        error "word count must be a number"
+      fi
+
       word_count=$2 
       shift 2
       ;;
     -l | --language)
+      [[ -z "$2" || "$2" =~ ^- ]] && error "missing language"
       language=$2 
       shift 2
       ;;
     -d | --difficulty)
-      difficulty=$2 
+      [[ -z "$2" || "$2" =~ ^- ]] && error "missing difficulty"
+      case "$2" in
+        easy|medium|hard)
+          difficulty="$2"
+          ;;
+        *)
+          error "invalid difficulty: $2 (use easy, medium, hard)"
+          ;;
+      esac
       shift 2
       ;;
     -h | --help)
