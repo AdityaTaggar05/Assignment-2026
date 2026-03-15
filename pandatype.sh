@@ -73,12 +73,18 @@ while [[ -n "$1" ]]; do
 done
 
 # TUI helpers
+center() {
+  term_width=$(tput cols)
+  padding=$(( ($term_width - ${#1}) / 2 ))
+  printf "%*s%s%*s\n" $padding "" "$1" $padding ""
+}
+
 draw_header() {
   tput cup 0 0
   tput bold
-  echo "BASH TYPING TEST"
+  center "BASH TYPING TEST"
   tput sgr0
-  echo "---------------------------------------------"
+  center "---------------------------------------------"
 }
 
 draw_menu() {
@@ -94,16 +100,16 @@ draw_menu() {
 
     case "${menu_items[$i]}" in
       "Word Count")
-        echo "Word Count : $word_count"
+        center "Word Count : $word_count"
         ;;
       "Difficulty")
-        echo "Difficulty : $difficulty"
+        center "Difficulty : $difficulty"
         ;;
       "Language")
-        echo "Language   : $language"
+        center "Language   : $language"
         ;;
       *)
-        echo "${menu_items[$i]}"
+        center "${menu_items[$i]}"
         ;;
     esac
 
@@ -111,7 +117,7 @@ draw_menu() {
   done
 
   echo ""
-  echo "Use the arrow keys or j/k to navigate, ENTER to select"
+  center "Use the arrow keys or j/k to navigate, ENTER to select"
 }
 
 # Input handling
@@ -130,7 +136,7 @@ load_wordset() {
   if ! [[ -f "$filename" ]]; then
     mkdir -p "$HOME/.local/share"
     if ! curl --silent --fail -L "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/languages/$language.json" -o "$filename"; then
-      echo "no wordset found corresponding to language $language. Reverting to default (english) in 2 seconds..."
+      center "no wordset found corresponding to language $language. Reverting to default (english) in 2 seconds..."
       sleep 2
       language="english"
       load_wordset
@@ -224,7 +230,7 @@ run_test() {
   save_results "$time" "$wpm" "$accuracy"
   show_results "$time" "$wpm" "$accuracy" "$(date)"
 
-  echo "Press any key to return to menu..."
+  center "Press any key to return to menu..."
   read -rsn1
 }
 
@@ -242,16 +248,16 @@ save_results() {
 # Results screen
 show_results() {
   echo ""
-  echo "===================================="
-  echo "             RESULTS                "
-  echo "===================================="
+  center "===================================="
+  center "             RESULTS                "
+  center "===================================="
   echo ""
-  echo "Time          : $1 sec"
-  echo "WPM           : $2"
-  echo "Accuracy      : $3 %"
-  echo "Test Done on  : $4"
+  center "Time          : $1 sec"
+  center "WPM           : $2"
+  center "Accuracy      : $3 %"
+  center "Test Done on  : $4"
   echo ""
-  echo "===================================="
+  center "===================================="
 }
 
 # History screen
@@ -266,11 +272,11 @@ show_history() {
       show_results "$time" "$wpm" "$accuracy" "$timestamp"
     done < "$file"
    else
-    echo "No history available."
+    center "No history available."
    fi
 
   echo ""
-  echo "Press any key to return to menu..."
+  center "Press any key to return to menu..."
   read -rsn1
 }
 
@@ -303,7 +309,7 @@ menu_loop() {
                 word_count="$temp"
                 break
               else
-                echo "word count must be a number"
+                center "word count must be a number"
                 echo ""
               fi
             done
@@ -318,7 +324,7 @@ menu_loop() {
                   break
                   ;;
                 *)
-                  echo "difficulty must either be easy/e, medium/m, hard/h"
+                  center "difficulty must either be easy/e, medium/m, hard/h"
                   echo ""
                   ;;
               esac
