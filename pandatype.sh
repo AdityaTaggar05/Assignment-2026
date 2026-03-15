@@ -1,29 +1,8 @@
 #!/bin/bash
 
-# Define an array of sentences/paragraphs for the test
-EASY_TEXTS=(
-  "The sun is bright today."
-  "I like to read books."
-  "Cats sleep on the sofa."
-  "She went to the park."
-  "We had fun at school."
-)
-
-MEDIUM_TEXTS=(
-  "The quick brown fox jumps over the lazy dog."
-  "She packed her bag and left for the early train."
-  "A gentle breeze moved the leaves in the quiet garden."
-  "The teacher asked everyone to finish the task before lunch."
-  "I forgot my umbrella and got soaked in the rain."
-)
-
-HARD_TEXTS=(
-  "Despite the heavy rain, the players continued the match until the final whistle blew."
-  "She whispered, “Please remember to lock the door before you leave tonight.”"
-  "In 2024, scientists announced a breakthrough that could change renewable energy forever."
-  "The engineer carefully reviewed the 42-page report before submitting it."
-  "While walking through the crowded market, I heard music, laughter, and distant conversations."
-)
+WORDSET="wordset.txt"
+mapfile -t words < "$WORDSET"
+symbols=("!" "?" "." "," ";" ":" "@", "#", "&", "*")
 
 # Function to calculate accuracy by comparing character by character
 calculate_accuracy() {
@@ -52,6 +31,28 @@ calculate_accuracy() {
     fi
 }
 
+# Generate sentence based on the passed parameters
+generate_sentence() {
+  num_words=$1 
+  freq_symbols=$2 
+
+  for ((i=1;i<=num_words;i++)); do
+    rand=$(( RANDOM % freq_symbols ))
+    random_idx=$(( RANDOM % ${#words[@]} ))
+    echo -n "${words[$random_idx]}"
+
+    # To ensure no symbols for easy mode
+    if (( rand == 1 )); then
+      echo -n "${symbols[$(( RANDOM % ${#symbols[@]} ))]}"
+    fi
+
+    # To ensure no extra whitespace is added at the end of sentence
+    if (( i != num_words )); then 
+      echo -n " "
+    fi
+  done
+}
+
 choose_difficulty() {
   read -p "Choose the difficulty level for you: Easy (e), Medium (m), Hard (h) : " difficulty
   sentence=""
@@ -59,13 +60,13 @@ choose_difficulty() {
 
   case "$difficulty" in
     e)
-      sentence="${EASY_TEXTS[$random_idx]}"
+      sentence=$(generate_sentence 8 1)
       ;;
-    n)
-      sentence="${MEDIUM_TEXTS[$random_idx]}"
+    m)
+      sentence=$(generate_sentence 12 5)
       ;;
     h)
-      sentence="${HARD_TEXTS[$random_idx]}"
+      sentence=$(generate_sentence 16 3)
       ;;
   esac
 
