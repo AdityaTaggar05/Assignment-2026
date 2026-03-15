@@ -80,7 +80,7 @@ draw_menu() {
   done
 
   echo ""
-  center "Use the arrow keys or j/k to navigate, ENTER to select"
+  center "Use the arrow keys or j/k to navigate, ENTER to select, q or CTRL+C to exit"
 }
 
 # Input handling
@@ -259,6 +259,9 @@ menu_loop() {
         ((selected++))
         ((selected>=${#menu_items[@]})) && selected=0
         draw_menu
+        ;;
+      "q")
+        exit
         ;;
       "")
         case $selected in
