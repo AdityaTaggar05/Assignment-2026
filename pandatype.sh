@@ -260,16 +260,14 @@ show_history() {
 
   file="$HOME/.local/share/pandatype-results.csv"
 
-  [[ -f "$file" ]] || {
+   if [[ -f "$file" ]]; then
+    draw_header
+    while IFS=',' read -r time wpm accuracy timestamp; do
+      show_results "$time" "$wpm" "$accuracy" "$timestamp"
+    done < "$file"
+   else
     echo "No history available."
-    read -rsn1
-    return
-  }
-
-  draw_header
-  while IFS=',' read -r time wpm accuracy timestamp; do
-    show_results "$time" "$wpm" "$accuracy" "$timestamp"
-  done < "$file"
+   fi
 
   echo ""
   echo "Press any key to return to menu..."
