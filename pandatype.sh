@@ -190,8 +190,8 @@ run_test() {
   clear
   draw_header
 
-  save_results "$time" "$wpm" "$accuracy"
-  show_results "$time" "$wpm" "$accuracy" "$(date)"
+  save_results "$time" "$wpm" "$accuracy" "$difficulty"
+  show_results "$time" "$wpm" "$accuracy" "$difficulty" "$(date)"
 
   center "Press any key to return to menu..."
   read -rsn1
@@ -205,7 +205,7 @@ save_results() {
     touch $filename
   fi
 
-  echo "$1,$2,$3,$(date)" >> $filename
+  echo "$1,$2,$3,$4,$(date)" >> $filename
 }
 
 # Results screen
@@ -215,10 +215,11 @@ show_results() {
   center "             RESULTS                "
   center "===================================="
   echo ""
-  center "Time          : $1 sec"
-  center "WPM           : $2"
-  center "Accuracy      : $3 %"
-  center "Test Done on  : $4"
+  center "Time : $1 sec"
+  center "WPM : $2"
+  center "Accuracy : $3 %"
+  center "Difficult : $4"
+  center "Test Done on : $5"
   echo ""
   center "===================================="
 }
@@ -231,8 +232,8 @@ show_history() {
 
    if [[ -f "$file" ]]; then
     draw_header
-    while IFS=',' read -r time wpm accuracy timestamp; do
-      show_results "$time" "$wpm" "$accuracy" "$timestamp"
+    while IFS=',' read -r time wpm accuracy diffi timestamp; do
+      show_results "$time" "$wpm" "$accuracy" "$diffi" "$timestamp"
     done < "$file"
    else
     center "No history available."
@@ -351,9 +352,7 @@ while [[ -n "$1" ]]; do
   esac
 done
 
-if ! load_wordset; then
-  exit 1 
-fi
+load_wordset
 
 tput civis
 trap "tput cnorm; clear; exit" EXIT
